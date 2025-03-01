@@ -82,9 +82,14 @@ centralPortal {
     password = sonatypePassword
     name = "parabol-renderer"
     publishingType = PublishingType.AUTOMATIC
-    jarTask = tasks.create<Jar>("builtModJar") {
-        from(tasks.jar.get())
+    jarTask = tasks.getByName<Jar>("jar") {
         archiveClassifier = null
+
+        conventionMapping.apply {
+            map("archiveClassifier") {
+                null
+            }
+        }
     }
 
     pom {
