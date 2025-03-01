@@ -1,11 +1,12 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.integr.parabol_renderer.mixin",
+  "package": "net.integr.parabol.renderer.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
   ],
   "client": [
+    "INativeImage"
   ],
   "injectors": {
     "defaultRequire": 1

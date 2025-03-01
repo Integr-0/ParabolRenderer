@@ -1,11 +1,13 @@
-package net.integr.parabol_renderer.engine
+package net.integr.parabol.renderer.engine
 
 import me.x150.renderer.render.MSAAFramebuffer
 import me.x150.renderer.render.MaskedBlurFramebuffer
 import me.x150.renderer.render.Renderer2d
-import net.integr.parabol_renderer.font.ParabolFontManager
+import me.x150.renderer.render.Renderer3d
+import net.integr.parabol.renderer.ParabolRenderer
+import net.integr.parabol.renderer.engine.font.ParabolFontManager
+import net.integr.parabol.renderer.engine.font.builder.ParabolText
 import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import org.jetbrains.annotations.Range
 import java.awt.Color
@@ -31,7 +33,7 @@ class Parabol2dCtx private constructor(private val mat: MatrixStack, private val
         bufferSwapAllowed = true
     }
 
-    fun useBlurMask(kernelSize: Int = 8, sigma: Float = 4f, block: Parabol2dCtx.() -> Unit) {
+    fun useBlurMask(kernelSize: Int = 11, sigma: Float = 7f, block: Parabol2dCtx.() -> Unit) {
         if (!bufferSwapAllowed) {
             throw IllegalStateException("Buffer swap to useBlurMask(...) is not allowed here.")
         }
@@ -133,7 +135,6 @@ class Parabol2dCtx private constructor(private val mat: MatrixStack, private val
     }
 
     fun roundedQuad(
-        stack: MatrixStack,
         x: Double,
         y: Double,
         x1: Double,
@@ -141,7 +142,7 @@ class Parabol2dCtx private constructor(private val mat: MatrixStack, private val
         rad: Float,
         c: Color = Color.WHITE
     ) {
-        Renderer2d.renderRoundedQuad(stack, c, x, y, x1, y1, rad, rad, rad, rad, samples.toFloat())
+        Renderer2d.renderRoundedQuad(mat, c, x, y, x1, y1, rad, rad, rad, rad, samples.toFloat())
     }
 
     fun roundedOutline(
@@ -188,27 +189,47 @@ class Parabol2dCtx private constructor(private val mat: MatrixStack, private val
         Renderer2d.renderLine(mat, color, x, y, x1, y1)
     }
 
-    fun text(text: Text, x: Float, y: Float, a: Float, font: String, size: Float) {
-        ParabolFontManager.getOrLoadFontRenderer(font, size).drawText(mat, text, x, y, a)
+    fun text(text: ParabolText, x: Double, y: Double, font: String, size: Float) {
+        ParabolFontManager.getOrLoadFontRenderer(font, size).drawText(mat, text, x, y)
     }
 
-    fun text(text: Text, x: Float, y: Float, a: Float, size: Float) {
-        ParabolFontManager.getDefaultFontRenderer(size).drawText(mat, text, x, y, a)
+    fun text(text: ParabolText, x: Double, y: Double, size: Float) {
+        ParabolFontManager.getDefaultFontRenderer(size).drawText(mat, text, x, y)
     }
 
-    fun textHeight(text: Text, font: String, size: Float): Float {
+    fun textHeight(text: ParabolText, font: String, size: Float): Float {
         return ParabolFontManager.getOrLoadFontRenderer(font, size).getTextHeight(text)
     }
 
-    fun textHeight(text: Text, size: Float): Float {
+    fun textHeight(text: ParabolText, size: Float): Float {
         return ParabolFontManager.getDefaultFontRenderer(size).getTextHeight(text)
     }
 
-    fun textWidth(text: Text, font: String, size: Float): Float {
+    fun textWidth(text: ParabolText, font: String, size: Float): Float {
         return ParabolFontManager.getOrLoadFontRenderer(font, size).getTextWidth(text)
     }
 
-    fun textWidth(text: Text, size: Float): Float {
+    fun textWidth(text: ParabolText, size: Float): Float {
         return ParabolFontManager.getDefaultFontRenderer(size).getTextWidth(text)
+    }
+
+    fun screenWidth(): Int {
+        return ParabolRenderer.MC.window.scaledWidth
+    }
+
+    fun screenHeight(): Int {
+        return ParabolRenderer.MC.window.scaledHeight
+    }
+
+    fun screenCenterX(): Int {
+        return ParabolRenderer.MC.window.scaledWidth / 2
+    }
+
+    fun screenCenterY(): Int {
+        return ParabolRenderer.MC.window.scaledHeight / 2
+    }
+
+    fun Color.modify(redOverwrite: Int, greenOverwrite: Int, blueOverwrite: Int, alphaOverwrite: Int): Color {
+        return Renderer3d.modifyColor(this, redOverwrite, greenOverwrite, blueOverwrite, alphaOverwrite)
     }
 }

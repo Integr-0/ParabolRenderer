@@ -11,7 +11,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "net.integr.parabol_renderer.ParabolRenderer"
+      "net.integr.parabol.renderer.ParabolRenderer"
     ]
   },
   "mixins": [

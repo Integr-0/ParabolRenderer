@@ -1,20 +1,19 @@
-package net.integr.parabol_renderer.font
+package net.integr.parabol.renderer.engine.font
 
-import me.x150.renderer.font.FontRenderer
-import net.integr.parabol_renderer.ParabolRenderer
+import net.integr.parabol.renderer.ParabolRenderer
 import java.awt.Font
 import java.awt.FontFormatException
 import java.io.IOException
 
 object ParabolFontManager {
-    private val fontCache = mutableMapOf<String, MutableMap<Int, FontRenderer>>()
+    private val fontCache = mutableMapOf<String, MutableMap<Int, ParabolFontRenderer>>()
     private val customFontCache = mutableMapOf<String, Font>()
 
     init {
-        registerCustomFont("assets/parabol-renderer/font/InterDisplay.ttf", "InterDisplay")
+        registerCustomFont("parabol-assets/font/Roboto-Regular.ttf", "RobotoRegular")
     }
 
-    private var defaultFont: String = "InterDisplay"
+    private var defaultFont: String = "RobotoRegular"
 
     fun registerCustomFont(path: String, name: String) {
         try {
@@ -34,19 +33,18 @@ object ParabolFontManager {
         defaultFont = font
     }
 
-    fun getDefaultFontRenderer(pxlSize: Float): FontRenderer {
+    fun getDefaultFontRenderer(pxlSize: Float): ParabolFontRenderer {
         return getOrLoadFontRenderer(defaultFont, pxlSize)
     }
 
-    fun getOrLoadFontRenderer(font: String, pxlSize: Float): FontRenderer {
+    fun getOrLoadFontRenderer(font: String, pxlSize: Float): ParabolFontRenderer {
         val fnt: Font = if (fontCache.containsKey(font) && fontCache[font]!!.containsKey(pxlSize.toInt())) {
             return fontCache[font]!![pxlSize.toInt()]!!
         } else if (customFontCache.containsKey(font)) {
             customFontCache[font]!!
         } else Font.decode(font)
 
-        val fntR = FontRenderer(fnt, pxlSize)
-        fntR.roundCoordinates(false)
+        val fntR = ParabolFontRenderer.make(fnt, pxlSize)
 
         if (!fontCache.containsKey(font)) {
             fontCache[font] = mutableMapOf()
