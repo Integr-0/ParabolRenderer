@@ -1,3 +1,4 @@
+import net.thebugmc.gradle.sonatypepublisher.PublishingType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -5,8 +6,12 @@ plugins {
     kotlin("jvm") version "2.0.0"
     id("fabric-loom") version "1.8.9"
     id("maven-publish")
+    id("net.thebugmc.gradle.sonatype-central-portal-publisher") version "1.2.4"
+    `java-library`
+    signing
 }
 
+description = "Internal rendering library for Parabol."
 version = project.property("mod_version") as String
 group = project.property("maven_group") as String
 
@@ -18,6 +23,7 @@ val targetJavaVersion = 21
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
     withSourcesJar()
+    withJavadocJar()
 }
 
 
@@ -68,17 +74,36 @@ tasks.jar {
     }
 }
 
-// configure the maven publication
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = project.property("archives_base_name") as String
-            from(components["java"])
+val sonatypeUser = project.findProperty("sonatypeUser") as String
+val sonatypePassword = project.findProperty("sonatypePassword") as String
+
+centralPortal {
+    username = sonatypeUser
+    password = sonatypePassword
+    name = "parabol-renderer"
+    publishingType = PublishingType.AUTOMATIC
+
+    pom {
+        name = "parabol-renderer"
+        description = "Internal rendering library for Parabol."
+        url = "https://github.com/Integr-0/ParabolRenderer"
+        licenses {
+            license {
+                name = "Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        }
+        developers {
+            developer {
+                id = "integr"
+                name = "Integr"
+            }
+        }
+        scm {
+            connection = "scm:git:https://github.com/Integr-0/ParabolRenderer.git"
+            developerConnection = "scm:git:https://github.com/Integr-0/ParabolRenderer.git"
+            url = "https://github.com/Integr-0/ParabolRenderer"
         }
     }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-
-    }
 }
+
