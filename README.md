@@ -81,12 +81,12 @@ This mod is not intended to be used as a standalone mod, but rather as a depende
 
 You can include this mod as a dependency in your `build.gradle` file:
 ```groovy
-include implementation("io.github.integr-0:parabol-renderer:$version") // Using fabrics Jar-in-Jar
+include modImplementation("io.github.integr-0:parabol-renderer:$version") // Using fabrics Jar-in-Jar
 ```
 
 or in your `build.gradle.kts` file:
 ```kotlin
-include(implementation("io.github.integr-0:parabol-renderer:$version")!!)  // Using fabrics Jar-in-Jar
+include(modImplementation("io.github.integr-0:parabol-renderer:$version")!!)  // Using fabrics Jar-in-Jar
 ```
 
 It is also possible to use maven:
