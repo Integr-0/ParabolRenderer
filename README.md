@@ -10,14 +10,25 @@ I encourage you to check out the Renderer library if you are looking for a more 
 - 2D rendering Context to draw on the UI layer.
 - 3D rendering Context to draw in the 3D world.
 
-## Dependencies
-- [Renderer](https://github.com/0x3C50/Renderer)
-- [Fabric Loader](https://fabricmc.net/)
-
 ## Usage
+### Font Manager
+```kotlin
+// Getting a system font as a usable FontRenderer
+val fontRenderer = ParabolFontManager.getOrLoadFontRenderer("Arial", 20f) // Font name, font size
+
+// Getting a custom font as a usable FontRenderer
+ParabolFontManager.registerCustomFont("path/to/your/font.ttf", "MyFont")
+val fontRenderer = ParabolFontManager.getOrLoadFontRenderer("MyFont", 16f) // Font name, font size
+
+// Getting default font as a usable FontRenderer
+ParabolFontManager.getDefaultFontRenderer(16f) // Font size
+
+// Setting the default font
+ParabolFontManager.setDefaultFont("MyFont") // Font name
+```
 ### 2D Context
 ```kotlin
-val ctx = Parabol2dCtx.create(drawCtx.matrices)
+val ctx = Parabol2dCtx.create(matrixStack)
 
 ctx.apply {
     useMultisample {
@@ -48,7 +59,7 @@ ctx.apply {
     }
 
     text(theText, 10f, 10f, 1f, 20f)
-
+    text(theText, 10f, 40f, 1f, "MyFont",20f)
 }
 ```
 
@@ -56,3 +67,7 @@ ctx.apply {
 This mod is not intended to be used as a standalone mod, but rather as a dependency for the Parabol configuration utility.
 
 TODO: Publish to maven for usage.
+
+## Dependencies
+- [Renderer](https://github.com/0x3C50/Renderer)
+- [Fabric Loader](https://fabricmc.net/)

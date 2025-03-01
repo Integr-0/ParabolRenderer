@@ -4,6 +4,7 @@ import me.x150.renderer.event.RenderEvents
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import net.integr.parabol_renderer.engine.Parabol2dCtx
+import net.integr.parabol_renderer.font.ParabolFontManager
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.Text
 import org.slf4j.LoggerFactory
@@ -20,6 +21,7 @@ class ParabolRenderer : ClientModInitializer {
     }
 
     override fun onInitializeClient() {
+        ParabolFontManager.setDefaultFont("MyFont")
         RenderEvents.HUD.register { drawCtx ->
             val ctx = Parabol2dCtx.create(drawCtx.matrices)
 
@@ -52,7 +54,7 @@ class ParabolRenderer : ClientModInitializer {
                 }
 
                 text(theText, 10f, 10f, 1f, 20f)
-
+                text(theText, 10f, 40f, 1f, "Arial",20f)
             }
 
         }
