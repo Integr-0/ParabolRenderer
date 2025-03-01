@@ -79,7 +79,24 @@ ctx.useThroughWalls {
 ## Implementing
 This mod is not intended to be used as a standalone mod, but rather as a dependency for the Parabol configuration utility.
 
-TODO: Publish to maven for usage.
+You can include this mod as a dependency in your `build.gradle` file:
+```groovy
+include implementation("io.github.integr-0:parabol-renderer:$version") // Using fabrics Jar-in-Jar
+```
+
+or in your `build.gradle.kts` file:
+```kotlin
+include(implementation("io.github.integr-0:parabol-renderer:$version")!!)  // Using fabrics Jar-in-Jar
+```
+
+It is also possible to use maven:
+```xml
+<dependency>
+    <groupId>io.github.integr-0</groupId>
+    <artifactId>parabol-renderer</artifactId>
+    <version>${version}</version>
+</dependency>
+```
 
 ## Dependencies
 - [Renderer](https://github.com/0x3C50/Renderer)
