@@ -228,7 +228,7 @@ class Render2dContext private constructor(private val mat: MatrixStack, private 
         return ParabolRenderer.MC.window.scaledHeight / 2
     }
 
-    fun svg(svg: String, x: Double, y: Double, sourceWidth: Int, sourceHeight: Int, width: Double, height: Double) {
-        SVGFile(svg, sourceWidth, sourceHeight).render(mat, x, y, width.toFloat(), height.toFloat())
+    fun svg(svg: SVGFile, x: Double, y: Double, width: Double, height: Double) {
+        svg.render(mat, x, y, width.toFloat(), height.toFloat())
     }
 }
