@@ -39,7 +39,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
 
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
-
+    implementation("com.github.weisj:jsvg:1.4.0")
     include(modImplementation("io.github.0x3c50.renderer:renderer-fabric:1.2.5")!!)
 }
 

@@ -1,9 +1,9 @@
 package net.integr.parabol.renderer
 
+import net.integr.parabol.renderer.util.svg.SVGFile
 import me.x150.renderer.render.MSAAFramebuffer
 import me.x150.renderer.render.MaskedBlurFramebuffer
 import me.x150.renderer.render.Renderer2d
-import me.x150.renderer.render.SVGFile
 import net.integr.parabol.renderer.font.FontManager
 import net.integr.parabol.renderer.font.builder.ParabolText
 import net.minecraft.client.util.math.MatrixStack
@@ -228,7 +228,7 @@ class Render2dContext private constructor(private val mat: MatrixStack, private 
         return ParabolRenderer.MC.window.scaledHeight / 2
     }
 
-    fun svg(svg: SVGFile, x: Double, y: Double, width: Double, height: Double) {
-        svg.render(mat, x, y, width.toFloat(), height.toFloat())
+    fun svg(svg: SVGFile, x: Double, y: Double, width: Double, height: Double, tint: Color) {
+        svg.render(mat, x, y, width.toFloat(), height.toFloat(), tint)
     }
 }

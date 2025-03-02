@@ -1,6 +1,5 @@
-package net.integr.parabol.renderer.util
+package net.integr.parabol.renderer.util.svg
 
-import me.x150.renderer.render.SVGFile
 import net.integr.parabol.renderer.ParabolRenderer
 
 object SvgLoader {
