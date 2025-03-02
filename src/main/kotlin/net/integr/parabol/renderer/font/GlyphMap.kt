@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package net.integr.parabol.renderer.engine.font
+package net.integr.parabol.renderer.font
 
 import com.mojang.blaze3d.systems.RenderSystem
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap
@@ -47,11 +47,11 @@ import kotlin.math.max
 import kotlin.math.sqrt
 
 
-internal class ParabolGlyphMap(private val fromIncl: Char, private val toExcl: Char, font: Font, identifier: Identifier, padding: Int, private var extraItalicPadding: Float = 0f) {
+internal class GlyphMap(private val fromIncl: Char, private val toExcl: Char, font: Font, identifier: Identifier, padding: Int, private var extraItalicPadding: Float = 0f) {
     private val font: Font
     val bindToTexture: Identifier
     private val pixelPadding: Int
-    private val glyphs = Char2ObjectArrayMap<ParabolGlyph>()
+    private val glyphs = Char2ObjectArrayMap<Glyph>()
     var width: Int = 0
     var height: Int = 0
 
@@ -63,7 +63,7 @@ internal class ParabolGlyphMap(private val fromIncl: Char, private val toExcl: C
         this.pixelPadding = padding
     }
 
-    fun getGlyph(c: Char): ParabolGlyph {
+    fun getGlyph(c: Char): Glyph {
         if (!generated) {
             generate()
         }
@@ -103,7 +103,7 @@ internal class ParabolGlyphMap(private val fromIncl: Char, private val toExcl: C
         var currentX = 0
         var currentY = 0
         var currentRowMaxY = 0
-        val glyphs1: MutableList<ParabolGlyph> = mutableListOf()
+        val glyphs1: MutableList<Glyph> = mutableListOf()
         val af = AffineTransform()
         val frc = FontRenderContext(af, true, false)
         while (generatedChars <= range) {
@@ -122,7 +122,7 @@ internal class ParabolGlyphMap(private val fromIncl: Char, private val toExcl: C
                 currentRowMaxY = 0
             }
             currentRowMaxY = max(currentRowMaxY.toDouble(), height.toDouble()).toInt()
-            glyphs1 += ParabolGlyph(currentX, currentY, width, height, currentChar, this)
+            glyphs1 += Glyph(currentX, currentY, width, height, currentChar, this)
             currentX += width + pixelPadding
             charNX++
         }

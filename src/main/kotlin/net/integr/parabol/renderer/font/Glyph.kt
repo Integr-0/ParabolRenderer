@@ -11,8 +11,8 @@
  * limitations under the License.
  */
 
-package net.integr.parabol.renderer.engine.font
+package net.integr.parabol.renderer.font
 
 
 @JvmRecord
-internal data class ParabolGlyph(val u: Int, val v: Int, val width: Int, val height: Int, val value: Char, val owner: ParabolGlyphMap)
+internal data class Glyph(val u: Int, val v: Int, val width: Int, val height: Int, val value: Char, val owner: GlyphMap)

@@ -1,12 +1,12 @@
-package net.integr.parabol.renderer.engine.font
+package net.integr.parabol.renderer.font
 
 import net.integr.parabol.renderer.ParabolRenderer
 import java.awt.Font
 import java.awt.FontFormatException
 import java.io.IOException
 
-object ParabolFontManager {
-    private val fontCache = mutableMapOf<String, MutableMap<Int, ParabolFontRenderer>>()
+object FontManager {
+    private val fontCache = mutableMapOf<String, MutableMap<Int, FontRenderer>>()
     private val customFontCache = mutableMapOf<String, Font>()
 
     init {
@@ -33,18 +33,18 @@ object ParabolFontManager {
         defaultFont = font
     }
 
-    fun getDefaultFontRenderer(pxlSize: Float): ParabolFontRenderer {
+    fun getDefaultFontRenderer(pxlSize: Float): FontRenderer {
         return getOrLoadFontRenderer(defaultFont, pxlSize)
     }
 
-    fun getOrLoadFontRenderer(font: String, pxlSize: Float): ParabolFontRenderer {
+    fun getOrLoadFontRenderer(font: String, pxlSize: Float): FontRenderer {
         val fnt: Font = if (fontCache.containsKey(font) && fontCache[font]!!.containsKey(pxlSize.toInt())) {
             return fontCache[font]!![pxlSize.toInt()]!!
         } else if (customFontCache.containsKey(font)) {
             customFontCache[font]!!
         } else Font.decode(font)
 
-        val fntR = ParabolFontRenderer.make(fnt, pxlSize)
+        val fntR = FontRenderer.make(fnt, pxlSize)
 
         if (!fontCache.containsKey(font)) {
             fontCache[font] = mutableMapOf()

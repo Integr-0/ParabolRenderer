@@ -1,28 +1,42 @@
-package net.integr.parabol.renderer.engine
+package net.integr.parabol.renderer
 
 import me.x150.renderer.render.MSAAFramebuffer
 import me.x150.renderer.render.MaskedBlurFramebuffer
 import me.x150.renderer.render.Renderer2d
-import me.x150.renderer.render.Renderer3d
-import net.integr.parabol.renderer.ParabolRenderer
-import net.integr.parabol.renderer.engine.font.ParabolFontManager
-import net.integr.parabol.renderer.engine.font.builder.ParabolText
+import net.integr.parabol.renderer.font.FontManager
+import net.integr.parabol.renderer.font.builder.ParabolText
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.Identifier
 import org.jetbrains.annotations.Range
 import java.awt.Color
 
-class Parabol2dCtx private constructor(private val mat: MatrixStack, private val samples: Int) {
+class Render2dContext private constructor(private val mat: MatrixStack, private val samples: Int) {
     companion object {
-        fun create(mat: MatrixStack, samples: Int = 8): Parabol2dCtx {
-            return Parabol2dCtx(mat, samples)
+        fun create(mat: MatrixStack, samples: Int = 8): Render2dContext {
+            return Render2dContext(mat, samples)
+        }
+
+        fun textHeight(text: ParabolText, font: String, size: Float): Float {
+            return FontManager.getOrLoadFontRenderer(font, size).getTextHeight(text)
+        }
+
+        fun textHeight(text: ParabolText, size: Float): Float {
+            return FontManager.getDefaultFontRenderer(size).getTextHeight(text)
+        }
+
+        fun textWidth(text: ParabolText, font: String, size: Float): Float {
+            return FontManager.getOrLoadFontRenderer(font, size).getTextWidth(text)
+        }
+
+        fun textWidth(text: ParabolText, size: Float): Float {
+            return FontManager.getDefaultFontRenderer(size).getTextWidth(text)
         }
     }
 
     private var bufferSwapAllowed = true
 
 
-    fun useMultisample(block: Parabol2dCtx.() -> Unit) {
+    fun useMultisample(block: Render2dContext.() -> Unit) {
         if (!bufferSwapAllowed) {
             throw IllegalStateException("Buffer swap to useMultisample(...) is not allowed here.")
         }
@@ -33,7 +47,7 @@ class Parabol2dCtx private constructor(private val mat: MatrixStack, private val
         bufferSwapAllowed = true
     }
 
-    fun useBlurMask(kernelSize: Int = 11, sigma: Float = 7f, block: Parabol2dCtx.() -> Unit) {
+    fun useBlurMask(kernelSize: Int = 11, sigma: Float = 7f, block: Render2dContext.() -> Unit) {
         if (!bufferSwapAllowed) {
             throw IllegalStateException("Buffer swap to useBlurMask(...) is not allowed here.")
         }
@@ -190,27 +204,11 @@ class Parabol2dCtx private constructor(private val mat: MatrixStack, private val
     }
 
     fun text(text: ParabolText, x: Double, y: Double, font: String, size: Float) {
-        ParabolFontManager.getOrLoadFontRenderer(font, size).drawText(mat, text, x, y)
+        FontManager.getOrLoadFontRenderer(font, size).drawText(mat, text, x, y)
     }
 
     fun text(text: ParabolText, x: Double, y: Double, size: Float) {
-        ParabolFontManager.getDefaultFontRenderer(size).drawText(mat, text, x, y)
-    }
-
-    fun textHeight(text: ParabolText, font: String, size: Float): Float {
-        return ParabolFontManager.getOrLoadFontRenderer(font, size).getTextHeight(text)
-    }
-
-    fun textHeight(text: ParabolText, size: Float): Float {
-        return ParabolFontManager.getDefaultFontRenderer(size).getTextHeight(text)
-    }
-
-    fun textWidth(text: ParabolText, font: String, size: Float): Float {
-        return ParabolFontManager.getOrLoadFontRenderer(font, size).getTextWidth(text)
-    }
-
-    fun textWidth(text: ParabolText, size: Float): Float {
-        return ParabolFontManager.getDefaultFontRenderer(size).getTextWidth(text)
+        FontManager.getDefaultFontRenderer(size).drawText(mat, text, x, y)
     }
 
     fun screenWidth(): Int {
@@ -227,9 +225,5 @@ class Parabol2dCtx private constructor(private val mat: MatrixStack, private val
 
     fun screenCenterY(): Int {
         return ParabolRenderer.MC.window.scaledHeight / 2
-    }
-
-    fun Color.modify(redOverwrite: Int, greenOverwrite: Int, blueOverwrite: Int, alphaOverwrite: Int): Color {
-        return Renderer3d.modifyColor(this, redOverwrite, greenOverwrite, blueOverwrite, alphaOverwrite)
     }
 }

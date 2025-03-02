@@ -11,22 +11,19 @@
  * limitations under the License.
  */
 
-package net.integr.parabol.renderer.engine.font
+package net.integr.parabol.renderer.font
 
 import com.mojang.blaze3d.systems.RenderSystem
-import it.unimi.dsi.fastutil.chars.Char2IntArrayMap
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap
-import it.unimi.dsi.fastutil.chars.Char2ObjectFunction
 import it.unimi.dsi.fastutil.objects.*
 import net.integr.parabol.renderer.ParabolRenderer
-import net.integr.parabol.renderer.engine.font.builder.ParabolText
+import net.integr.parabol.renderer.font.builder.ParabolText
 import net.minecraft.client.gl.ShaderProgramKeys
 import net.minecraft.client.render.*
 import net.minecraft.client.render.VertexFormat.DrawMode
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.Identifier
 import org.lwjgl.opengl.GL11
-import java.awt.Color
 import java.awt.Font
 import java.io.Closeable
 import java.util.*
@@ -38,25 +35,25 @@ import kotlin.math.pow
 import kotlin.random.Random
 
 
-class ParabolFontRenderer(private val initFont: Font, private val originalSize: Float, private val charsPerPage: Int, private val padding: Int) : Closeable {
+class FontRenderer(private val initFont: Font, private val originalSize: Float, private val charsPerPage: Int, private val padding: Int) : Closeable {
     companion object {
-        fun make(font: Font, size: Float): ParabolFontRenderer {
-            return ParabolFontRenderer(font, size)
+        fun make(font: Font, size: Float): FontRenderer {
+            return FontRenderer(font, size)
         }
     }
 
     private val glyphPageCache: Object2ObjectMap<Identifier, ObjectList<DrawEntry>> = Object2ObjectOpenHashMap()
-    private val allGlyphs = Char2ObjectArrayMap<ParabolGlyph>()
+    private val allGlyphs = Char2ObjectArrayMap<Glyph>()
     private var scaleMul = 0
 
     private var fontDefault: Font? = null
-    private val mapsDefault: ObjectList<ParabolGlyphMap> = ObjectArrayList()
+    private val mapsDefault: ObjectList<GlyphMap> = ObjectArrayList()
     private var fontBold: Font? = null
-    private val mapsBold: ObjectList<ParabolGlyphMap> = ObjectArrayList()
+    private val mapsBold: ObjectList<GlyphMap> = ObjectArrayList()
     private var fontItalic: Font? = null
-    private val mapsItalic: ObjectList<ParabolGlyphMap> = ObjectArrayList()
+    private val mapsItalic: ObjectList<GlyphMap> = ObjectArrayList()
     private var fontBoldItalic: Font? = null
-    private val mapsBoldItalic: ObjectList<ParabolGlyphMap> = ObjectArrayList()
+    private val mapsBoldItalic: ObjectList<GlyphMap> = ObjectArrayList()
 
     private var previousGameScale = -1
     private var initialized = false
@@ -86,8 +83,8 @@ class ParabolFontRenderer(private val initFont: Font, private val originalSize: 
         this.fontBoldItalic = font.deriveFont(sizePx * this.scaleMul).deriveFont(Font.BOLD or Font.ITALIC)
     }
 
-    private fun generateMap(from: Char, to: Char, font: Int): ParabolGlyphMap {
-        val gm = ParabolGlyphMap(from, to, fontFromStyle(font)!!, randomIdentifier(), padding, if (font == Font.ITALIC || font == Font.BOLD or Font.ITALIC) 1.3f else 0f)
+    private fun generateMap(from: Char, to: Char, font: Int): GlyphMap {
+        val gm = GlyphMap(from, to, fontFromStyle(font)!!, randomIdentifier(), padding, if (font == Font.ITALIC || font == Font.BOLD or Font.ITALIC) 1.3f else 0f)
         mapsFromStyle(font).add(gm)
         return gm
     }
@@ -102,7 +99,7 @@ class ParabolFontRenderer(private val initFont: Font, private val originalSize: 
         }
     }
 
-    private fun mapsFromStyle(style: Int): ObjectList<ParabolGlyphMap> {
+    private fun mapsFromStyle(style: Int): ObjectList<GlyphMap> {
         return when(style) {
             Font.PLAIN -> mapsDefault
             Font.BOLD -> mapsBold
@@ -112,14 +109,14 @@ class ParabolFontRenderer(private val initFont: Font, private val originalSize: 
         }
     }
 
-    private fun locateGlyph0(glyph: Char, font: Int): ParabolGlyph {
+    private fun locateGlyph0(glyph: Char, font: Int): Glyph {
         for (map in mapsFromStyle(font)) {
             if (map.contains(glyph)) {
                 return map.getGlyph(glyph)
             }
         }
         val base = floorNearestMulN(glyph.code, charsPerPage)
-        val glyphMap: ParabolGlyphMap = generateMap(base.toChar(), (base + charsPerPage).toChar(), font)
+        val glyphMap: GlyphMap = generateMap(base.toChar(), (base + charsPerPage).toChar(), font)
         return glyphMap.getGlyph(glyph)
     }
 
@@ -197,7 +194,7 @@ class ParabolFontRenderer(private val initFont: Font, private val originalSize: 
                 bb = Tessellator.getInstance().begin(DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR)
 
                 for ((xo, yo, cr, cg, cb, ca, glyph) in objects) {
-                    val owner: ParabolGlyphMap = glyph.owner
+                    val owner: GlyphMap = glyph.owner
                     val w: Float = glyph.width.toFloat()
                     val h: Float = glyph.height.toFloat()
                     val u1: Float = glyph.u.toFloat() / owner.width
@@ -319,7 +316,7 @@ class ParabolFontRenderer(private val initFont: Font, private val originalSize: 
         val g: Float,
         val b: Float,
         val a: Float,
-        val toDraw: ParabolGlyph
+        val toDraw: Glyph
     )
 
     private fun floorNearestMulN(x: Int, n: Int): Int {

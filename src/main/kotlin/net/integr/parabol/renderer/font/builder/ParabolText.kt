@@ -1,4 +1,4 @@
-package net.integr.parabol.renderer.engine.font.builder
+package net.integr.parabol.renderer.font.builder
 
 import java.awt.Color
 import java.awt.Font
