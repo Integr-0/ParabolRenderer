@@ -1,11 +1,11 @@
 package net.integr.parabol.renderer.util.svg
 
 import com.github.weisj.jsvg.SVGDocument
+import com.github.weisj.jsvg.SVGRenderingHints
 import com.github.weisj.jsvg.attributes.ViewBox
 import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint
 import com.github.weisj.jsvg.parser.DefaultParserProvider
 import com.github.weisj.jsvg.parser.DomProcessor
-import com.github.weisj.jsvg.parser.ParsedElement
 import com.github.weisj.jsvg.parser.SVGLoader
 import com.mojang.blaze3d.systems.RenderSystem
 import me.x150.renderer.render.Renderer2d
@@ -27,10 +27,9 @@ import java.util.*
 import javax.swing.JComponent
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.roundToInt
 
 
-class SVGFile(@Language("SVG") val svgSource: String, private val originalWidth: Int, private val originalHeight: Int) : Closeable {
+class SvgFile(@Language("SVG") val svgSource: String, private val originalWidth: Int, private val originalHeight: Int) : Closeable {
     private var memoizedGuiScale: Int = -1
     private var id: AbstractTexture? = null
     private var isMcTexture: Boolean = false
@@ -57,10 +56,13 @@ class SVGFile(@Language("SVG") val svgSource: String, private val originalWidth:
                     }
                 }))
 
-            val bi = BufferedImage(floor(width.toDouble()).toInt(), floor(height.toDouble()).toInt(), 2)
+            val bi = BufferedImage(floor(width.toDouble()).toInt(), floor(height.toDouble()).toInt(), BufferedImage.TYPE_INT_ARGB)
             val g = bi.createGraphics()
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
+            g.setRenderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING, SVGRenderingHints.VALUE_SOFT_CLIPPING_ON);
+            g.setRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING, SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_ON);
+
             doc.render(null as JComponent?, g, ViewBox(floor(width), floor(height)))
             g.dispose()
             this.id = RendererUtils.bufferedImageToNIBT(bi)
@@ -71,7 +73,7 @@ class SVGFile(@Language("SVG") val svgSource: String, private val originalWidth:
         }
     }
 
-    fun render(stack: MatrixStack?, x: Double, y: Double, renderWidth: Float, renderHeight: Float, tintColor: Color) {
+    fun render(stack: MatrixStack, x: Double, y: Double, renderWidth: Float, renderHeight: Float, tintColor: Color) {
         val guiScale = RendererUtils.getGuiScale()
         if (this.memoizedGuiScale != guiScale || this.id == null) {
             this.memoizedGuiScale = guiScale
