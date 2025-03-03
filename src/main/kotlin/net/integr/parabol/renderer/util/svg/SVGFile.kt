@@ -1,25 +1,32 @@
 package net.integr.parabol.renderer.util.svg
 
+import com.github.weisj.jsvg.SVGDocument
 import com.github.weisj.jsvg.attributes.ViewBox
+import com.github.weisj.jsvg.attributes.paint.SimplePaintSVGPaint
+import com.github.weisj.jsvg.parser.DefaultParserProvider
+import com.github.weisj.jsvg.parser.DomProcessor
+import com.github.weisj.jsvg.parser.ParsedElement
 import com.github.weisj.jsvg.parser.SVGLoader
 import com.mojang.blaze3d.systems.RenderSystem
-import me.x150.renderer.RendererMain
 import me.x150.renderer.render.Renderer2d
 import me.x150.renderer.util.RendererUtils
 import net.integr.parabol.renderer.ParabolRenderer
+import net.minecraft.client.MinecraftClient
 import net.minecraft.client.texture.AbstractTexture
 import net.minecraft.client.texture.MissingSprite
 import net.minecraft.client.util.math.MatrixStack
 import org.intellij.lang.annotations.Language
 import java.awt.Color
-import java.awt.AlphaComposite
+import java.awt.Paint
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.Closeable
 import java.nio.charset.StandardCharsets
+import java.util.*
 import javax.swing.JComponent
 import kotlin.math.ceil
+
 
 class SVGFile(@Language("SVG") val svgSource: String, private val originalWidth: Int, private val originalHeight: Int) : Closeable {
     private var memoizedGuiScale: Int = -1
@@ -33,30 +40,32 @@ class SVGFile(@Language("SVG") val svgSource: String, private val originalWidth:
 
         try {
             val loader = SVGLoader()
-            val doc =
-                checkNotNull(loader.load(ByteArrayInputStream(svgSource.toByteArray(StandardCharsets.UTF_8))))
+            val doc: SVGDocument =
+                checkNotNull(loader.load(ByteArrayInputStream(svgSource.toByteArray(StandardCharsets.UTF_8)), object : DefaultParserProvider() {
+                    override fun createPreProcessor(): DomProcessor {
+                        return DomProcessor { root ->
+                            root.children().forEach {
+                                val attrNode = it.attributeNode()
+                                val dynamicColor = DynamicAWTSvgPaint(tintColor)
+                                val uniqueIdForDynamicColor = UUID.randomUUID().toString()
+                                it.registerNamedElement(uniqueIdForDynamicColor, dynamicColor);
+                                attrNode.attributes()["fill"] = uniqueIdForDynamicColor
+                            }
+                        }
+                    }
+                }))
 
-            val bi = BufferedImage(ceil(width.toDouble()).toInt(), ceil(height.toDouble()).toInt(), BufferedImage.TYPE_INT_ARGB)
+            val bi = BufferedImage(ceil(width.toDouble()).toInt(), ceil(height.toDouble()).toInt(), 2)
             val g = bi.createGraphics()
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
-
             doc.render(null as JComponent?, g, ViewBox(width, height))
-
-            val tint = BufferedImage(bi.width, bi.height, BufferedImage.TYPE_INT_ARGB)
-            val g2 = tint.createGraphics()
-            g2.drawImage(bi, 0, 0, null)
-            g2.composite = AlphaComposite.SrcOver.derive(tintColor.alpha / 255f)
-            g2.color = tintColor
-            g2.fillRect(0, 0, bi.width, bi.height)
-            g2.dispose()
-
             g.dispose()
-            this.id = RendererUtils.bufferedImageToNIBT(tint)
+            this.id = RendererUtils.bufferedImageToNIBT(bi)
         } catch (var7: Throwable) {
-            RendererMain.LOGGER.error("Failed to render SVG", var7)
+            ParabolRenderer.LOGGER.error("Failed to render SVG", var7)
             this.isMcTexture = true
-            this.id = ParabolRenderer.MC.textureManager.getTexture(MissingSprite.getMissingSpriteId())
+            this.id = MinecraftClient.getInstance().textureManager.getTexture(MissingSprite.getMissingSpriteId())
         }
     }
 
@@ -87,5 +96,11 @@ class SVGFile(@Language("SVG") val svgSource: String, private val originalWidth:
         }
 
         this.id = null
+    }
+
+    class DynamicAWTSvgPaint internal constructor(private var color: Color) : SimplePaintSVGPaint {
+        override fun paint(): Paint {
+            return color
+        }
     }
 }
