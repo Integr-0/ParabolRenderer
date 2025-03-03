@@ -26,6 +26,8 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import javax.swing.JComponent
 import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.roundToInt
 
 
 class SVGFile(@Language("SVG") val svgSource: String, private val originalWidth: Int, private val originalHeight: Int) : Closeable {
@@ -55,11 +57,11 @@ class SVGFile(@Language("SVG") val svgSource: String, private val originalWidth:
                     }
                 }))
 
-            val bi = BufferedImage(ceil(width.toDouble()).toInt(), ceil(height.toDouble()).toInt(), 2)
+            val bi = BufferedImage(floor(width.toDouble()).toInt(), floor(height.toDouble()).toInt(), 2)
             val g = bi.createGraphics()
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
-            doc.render(null as JComponent?, g, ViewBox(width, height))
+            doc.render(null as JComponent?, g, ViewBox(floor(width), floor(height)))
             g.dispose()
             this.id = RendererUtils.bufferedImageToNIBT(bi)
         } catch (var7: Throwable) {
