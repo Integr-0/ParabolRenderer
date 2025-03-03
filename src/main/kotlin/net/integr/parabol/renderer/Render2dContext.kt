@@ -6,6 +6,7 @@ import me.x150.renderer.render.MaskedBlurFramebuffer
 import me.x150.renderer.render.Renderer2d
 import net.integr.parabol.renderer.font.FontManager
 import net.integr.parabol.renderer.font.builder.ParabolText
+import net.integr.parabol.renderer.util.svg.SvgIcon
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.Identifier
 import org.jetbrains.annotations.Range
@@ -228,7 +229,7 @@ class Render2dContext private constructor(private val mat: MatrixStack, private 
         return ParabolRenderer.MC.window.scaledHeight / 2
     }
 
-    fun svg(svg: SvgFile, x: Double, y: Double, width: Double, height: Double, tint: Color) {
+    fun svg(svg: SvgIcon, x: Double, y: Double, width: Double, height: Double, tint: Color) {
         svg.render(mat, x, y, width.toFloat(), height.toFloat(), tint)
     }
 }
