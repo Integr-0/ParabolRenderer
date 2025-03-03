@@ -34,20 +34,25 @@ class SVGFile(@Language("SVG") val svgSource: String, private val originalWidth:
         try {
             val loader = SVGLoader()
             val doc =
-                checkNotNull(loader.load(ByteArrayInputStream(svgSource!!.toByteArray(StandardCharsets.UTF_8))))
+                checkNotNull(loader.load(ByteArrayInputStream(svgSource.toByteArray(StandardCharsets.UTF_8))))
 
-            val bi = BufferedImage(ceil(width.toDouble()).toInt(), ceil(height.toDouble()).toInt(), 2)
+            val bi = BufferedImage(ceil(width.toDouble()).toInt(), ceil(height.toDouble()).toInt(), BufferedImage.TYPE_INT_ARGB)
             val g = bi.createGraphics()
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
 
-            g.composite = AlphaComposite.SrcOver.derive(tintColor.alpha / 255f)
-            g.color = tintColor
-            g.fillRect(0, 0, bi.width, bi.height)
-
             doc.render(null as JComponent?, g, ViewBox(width, height))
+
+            val tint = BufferedImage(bi.width, bi.height, BufferedImage.TYPE_INT_ARGB)
+            val g2 = tint.createGraphics()
+            g2.drawImage(bi, 0, 0, null)
+            g2.composite = AlphaComposite.SrcOver.derive(tintColor.alpha / 255f)
+            g2.color = tintColor
+            g2.fillRect(0, 0, bi.width, bi.height)
+            g2.dispose()
+
             g.dispose()
-            this.id = RendererUtils.bufferedImageToNIBT(bi)
+            this.id = RendererUtils.bufferedImageToNIBT(tint)
         } catch (var7: Throwable) {
             RendererMain.LOGGER.error("Failed to render SVG", var7)
             this.isMcTexture = true
