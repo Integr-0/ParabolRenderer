@@ -11,6 +11,8 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.Identifier
 import org.jetbrains.annotations.Range
 import java.awt.Color
+import kotlin.math.floor
+import kotlin.math.roundToInt
 
 class Render2dContext private constructor(private val mat: MatrixStack, private val samples: Int) {
     companion object {
@@ -230,6 +232,6 @@ class Render2dContext private constructor(private val mat: MatrixStack, private 
     }
 
     fun svg(svg: SvgIcon, x: Double, y: Double, width: Double, height: Double, tint: Color) {
-        svg.render(mat, x, y, width.toFloat(), height.toFloat(), tint)
+        svg.render(mat, x.roundToInt().toDouble(), y.roundToInt().toDouble(), width.toFloat(), height.toFloat(), tint)
     }
 }
