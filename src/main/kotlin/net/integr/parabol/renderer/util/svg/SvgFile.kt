@@ -31,6 +31,7 @@ import kotlin.math.floor
 
 class SvgFile(@Language("SVG") val svgSource: String, private val originalWidth: Int, private val originalHeight: Int) : Closeable {
     private var memoizedGuiScale: Int = -1
+    private var memoizedColor: Color? = null
     private var id: AbstractTexture? = null
     private var isMcTexture: Boolean = false
 
@@ -41,27 +42,25 @@ class SvgFile(@Language("SVG") val svgSource: String, private val originalWidth:
 
         try {
             val loader = SVGLoader()
-            val doc: SVGDocument =
-                checkNotNull(loader.load(ByteArrayInputStream(svgSource.toByteArray(StandardCharsets.UTF_8)), object : DefaultParserProvider() {
-                    override fun createPreProcessor(): DomProcessor {
-                        return DomProcessor { root ->
-                            root.children().forEach {
-                                val attrNode = it.attributeNode()
-                                val dynamicColor = DynamicAWTSvgPaint(tintColor)
-                                val uniqueIdForDynamicColor = UUID.randomUUID().toString()
-                                it.registerNamedElement(uniqueIdForDynamicColor, dynamicColor);
-                                attrNode.attributes()["fill"] = uniqueIdForDynamicColor
-                            }
+            val doc: SVGDocument = checkNotNull(loader.load(ByteArrayInputStream(svgSource.toByteArray(StandardCharsets.UTF_8)), object : DefaultParserProvider() {
+                override fun createPreProcessor(): DomProcessor {
+                    return DomProcessor { root ->
+                        val dynamicColor = DynamicAWTSvgPaint(tintColor)
+                        val uniqueIdForDynamicColor = UUID.randomUUID().toString()
+                        root.children().forEach {
+                            it.registerNamedElement(uniqueIdForDynamicColor, dynamicColor)
+                            it.attributeNode().attributes()["fill"] = uniqueIdForDynamicColor
                         }
                     }
-                }))
+                }
+            }))
 
             val bi = BufferedImage(floor(width.toDouble()).toInt(), floor(height.toDouble()).toInt(), BufferedImage.TYPE_INT_ARGB)
             val g = bi.createGraphics()
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
             g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
-            g.setRenderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING, SVGRenderingHints.VALUE_SOFT_CLIPPING_ON);
-            g.setRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING, SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_ON);
+            g.setRenderingHint(SVGRenderingHints.KEY_SOFT_CLIPPING, SVGRenderingHints.VALUE_SOFT_CLIPPING_ON)
+            g.setRenderingHint(SVGRenderingHints.KEY_IMAGE_ANTIALIASING, SVGRenderingHints.VALUE_IMAGE_ANTIALIASING_ON)
 
             doc.render(null as JComponent?, g, ViewBox(floor(width), floor(height)))
             g.dispose()
@@ -75,8 +74,9 @@ class SvgFile(@Language("SVG") val svgSource: String, private val originalWidth:
 
     fun render(stack: MatrixStack, x: Double, y: Double, renderWidth: Float, renderHeight: Float, tintColor: Color) {
         val guiScale = RendererUtils.getGuiScale()
-        if (this.memoizedGuiScale != guiScale || this.id == null) {
+        if (this.memoizedGuiScale != guiScale || this.id == null || this.memoizedColor != tintColor) {
             this.memoizedGuiScale = guiScale
+            this.memoizedColor = tintColor
             this.redraw(
                 (this.originalWidth * this.memoizedGuiScale).toFloat(),
                 (this.originalHeight * this.memoizedGuiScale).toFloat(),
