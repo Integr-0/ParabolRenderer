@@ -1,9 +1,11 @@
 package net.integr.parabol.renderer
 
+import me.x150.renderer.render.ClipStack
 import net.integr.parabol.renderer.util.svg.SvgFile
 import me.x150.renderer.render.MSAAFramebuffer
 import me.x150.renderer.render.MaskedBlurFramebuffer
 import me.x150.renderer.render.Renderer2d
+import me.x150.renderer.util.Rectangle
 import net.integr.parabol.renderer.font.FontManager
 import net.integr.parabol.renderer.font.builder.ParabolText
 import net.integr.parabol.renderer.util.svg.SvgIcon
@@ -46,6 +48,17 @@ class Render2dContext private constructor(private val mat: MatrixStack, private 
         }
         bufferSwapAllowed = false
         MSAAFramebuffer.use(samples) {
+            this.block()
+        }
+        bufferSwapAllowed = true
+    }
+
+    fun useScissor(x: Double, y: Double, width: Double, height: Double, block: Render2dContext.() -> Unit) {
+        if (!bufferSwapAllowed) {
+            throw IllegalStateException("Buffer swap to useScissor(...) is not allowed here.")
+        }
+        bufferSwapAllowed = false
+        ClipStack.use(mat, Rectangle(x, y, x + width, y + height)) {
             this.block()
         }
         bufferSwapAllowed = true
